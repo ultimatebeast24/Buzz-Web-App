@@ -28,7 +28,6 @@ export const signup = async (req, res) => {
             fullName,
             username,
             password: hashedPassword, //saving a hashed password for security
-            confirmPassword,
             gender,
             profilePic: gender === "male" ? boyProfilePic : girlProfilePic
         });
@@ -56,12 +55,12 @@ export const login = async (req, res) => {
     try {
         const { username, password } = req.body;
         const user = await User.findOne({ username });
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        if (user && isPasswordCorrect)
-            generateTokenAndSetCookie(user._id, res);
-        else
+        const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
+        if (!user || !isPasswordCorrect) {
             res.status(400).json({ message: "Invalid credentials", });
+        }
         
+        generateTokenAndSetCookie(user._id, res);
         //after successfully logging in, we want to return the user's data , excluding the pass.
         res.status(200).json({
             _id: user._id,
