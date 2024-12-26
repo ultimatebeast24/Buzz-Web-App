@@ -7,13 +7,11 @@ const conversationSchema = new mongoose.Schema({
             ref: "User",
         },
     ],
-    messages: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Message",
-            default:[],
-        },
-    ],
+    lastMessage: {
+      text: { type: String },
+      image: { type: String },
+      timestamp: { type: Date, default: Date.now },
+    },
 }, { timestamps: true }
 );
 
