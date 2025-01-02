@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
+import { Eye, EyeClosed, EyeOff, Loader2, Lock, MessageSquare, UserPen } from "lucide-react";
+import toast from "react-hot-toast";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
   const { login, isLoggingIn } = useAuthStore();
@@ -40,18 +41,27 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-medium">Email</span>
+                <span className="label-text font-medium">Username</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-base-content/40" />
+                  <UserPen className="h-5 w-5 text-base-content/40" />
                 </div>
                 <input
-                  type="email"
-                  className={`input input-bordered w-full pl-10`}
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    type="username"
+                    className={`input input-bordered w-full pl-10`}
+                    placeholder="username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ 
+                        ...formData, 
+                        username: e.target.value.replace(/\s/g, '') // Remove any spaces
+                    })}
+                    onKeyDown={(e) => {
+                      if (e.key === ' ') {
+                          toast('No Space Allowed', {icon: '👀🤖',});
+                          e.preventDefault(); // Prevent space key from being typed
+                        }
+                    }}
                 />
               </div>
             </div>
