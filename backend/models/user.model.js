@@ -19,14 +19,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
-    // isAdmin: {
-    //     type: Boolean,
-    //     default: false,
-    // },
-    
-},//createdAT , updatedAT => member since -> <createdAt>
-    { timestamps: true }
-);
+    status: {
+        type: String,
+        enum: ['online', 'dnd'],
+        default: 'online'
+    }
+}, { timestamps: true });
 
 const User = mongoose.model("User", userSchema);
 export default User;

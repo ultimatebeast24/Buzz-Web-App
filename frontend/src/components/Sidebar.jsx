@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
-import { Users } from "lucide-react";
+import { Users, Moon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 
 const Sidebar = () => {
   const { getUsers, users, selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
-  const { onlineUsers, authUser } = useAuthStore();
+  const { onlineUsers, authUser, userStatus, setUserStatus } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+
   useEffect(() => {
     getUsers();
   }, [getUsers]);
 
   if (isUsersLoading) return <SidebarSkeleton />;
 
-  // Extract user data from the nested structure
   const filteredUsers = users
-    .map(userData => userData.user) // Extract user object from the nested structure
+    .map(userData => userData.user)
     .filter((user, index, self) => 
       self.findIndex(u => u._id === user._id) === index
     );
@@ -24,11 +24,25 @@ const Sidebar = () => {
   return (
     <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
       <div className="border-b border-base-300 w-full p-5">
-        <div className="flex items-center gap-2">
-          <Users className="size-6" />
-          <span className="font-medium hidden lg:block">Contacts ({filteredUsers.length})</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="size-6" />
+            <span className="font-medium hidden lg:block">Contacts ({filteredUsers.length})</span>
+          </div>
+          
+          {/* Status Selection Dropdown */}
+          <div className="hidden lg:block">
+            <select 
+              className="select select-bordered select-sm w-32"
+              value={userStatus}
+              onChange={(e) => setUserStatus(e.target.value)}
+            >
+              <option value="online">🟢 Online</option>
+              <option value="DND">🌙 DND</option>
+            </select>
+          </div>
         </div>
-        {/* TODO: Online filter Toggle */}
+
         <div className="mt-3 hidden lg:flex items-center gap-2">
           <label className="cursor-pointer flex items-center gap-2">
             <input
@@ -42,7 +56,7 @@ const Sidebar = () => {
           <span className="text-xs text-zinc-500">({onlineUsers.length - 1} online)</span>
         </div>
       </div>
-
+      
       <div className="overflow-y-auto w-full py-3">
         {filteredUsers.map((user) => (
           <button
@@ -62,8 +76,8 @@ const Sidebar = () => {
               />
               {onlineUsers.includes(user._id) && (
                 <span
-                  className="absolute bottom-0 right-0 size-3 bg-green-500 
-                  rounded-full ring-2 ring-zinc-900"
+                  className={`absolute bottom-0 right-0 size-3 rounded-full ring-2 ring-zinc-900
+                    ${user.status === "DND" ? "bg-yellow-500" : "bg-green-500"}`}
                 />
               )}
             </div>
@@ -71,7 +85,9 @@ const Sidebar = () => {
             <div className="hidden lg:block text-left min-w-0">
               <div className="font-medium truncate">{user.fullName}</div>
               <div className="text-sm text-zinc-400">
-                {onlineUsers.includes(user._id) ? "Online" : "Offline"}
+                {onlineUsers.includes(user._id) 
+                  ? user.status === "DND" ? "DND" : "Online"
+                  : "Offline"}
               </div>
             </div>
           </button>

@@ -13,12 +13,37 @@ export const useAuthStore = create((set,get) => ({
   ischeckingAuth: true,
   onlineUsers: [],
   socket: null,
+  userStatus: 'online',
+
+  // Add setUserStatus function
+  setUserStatus: async (status) => {
+    try {
+      const res = await axiosInstance.put("/auth/update-status", { status });
+      set({ userStatus: status });
+      
+      // Emit status change through socket
+      if (get().socket?.connected) {
+        get().socket.emit("updateStatus", { 
+          userId: get().authUser._id,
+          status 
+        });
+      }
+      
+      toast.success(`Status updated to ${status}`);
+    } catch (error) {
+      console.log("Error updating status:", error);
+      toast.error("Failed to update status");
+    }
+  },
 
   checkAuth: async () => {
     try {
       const res = await axiosInstance.get("/auth/check");
 
-      set({ authUser: res.data });
+      set({
+        authUser: res.data,
+        userStatus: res.data.status || 'online'
+      });
       get().connectSocket();
       
     } catch (error) {
@@ -100,6 +125,7 @@ export const useAuthStore = create((set,get) => ({
     const socket = io(BASE_URL, {
       query: {
         userId: authUser._id,
+        status: get().userStatus // Add status to socket connection
       },
     });
     socket.connect();
@@ -108,9 +134,21 @@ export const useAuthStore = create((set,get) => ({
 
     socket.on("getOnlineUsers" , (userIds) => {
       set({ onlineUsers: userIds });
-    })
+    });
+
+    socket.on("userStatusUpdate", ({ userId, status }) => {
+      // Update online users with new status
+      const updatedOnlineUsers = get().onlineUsers.map(user => {
+        if (user._id === userId) {
+          return { ...user, status };
+        }
+        return user;
+      });
+      set({ onlineUsers: updatedOnlineUsers });
+    });
   },
+      
   disconnectSocket: () => {
     if (get().socket?.connected) get().socket.disconnect();
-  },
+  }
 }));

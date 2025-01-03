@@ -118,3 +118,26 @@ export const checkAuth = (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// Add this new controller function alongside your existing ones
+export const updateStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const userId = req.user._id;
+
+        if (!['online', 'DND'].includes(status)) {
+            return res.status(400).json({ error: "Invalid status" });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { status },
+            { new: true }
+        ).select("-password");  // Exclude password from the response
+
+        res.status(200).json(updatedUser);
+    } catch (error) {
+        console.log("Error in update status:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
