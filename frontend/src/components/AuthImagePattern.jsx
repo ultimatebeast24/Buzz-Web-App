@@ -28,15 +28,16 @@ const AuthImagePattern = ({ title, subtitle }) => {
         {/* Image with pulse animation */}
         <div className="relative aspect-square rounded-2xl overflow-hidden">
           <img
-            src="../public/buzzbees.png" // Replace with your image path
+            src="/BUZZ.jpeg" // Replace with your image path
             alt="Image with pulse effect"
             className="w-full h-full object-cover animate-pulse duration-1000"
           />
         </div>
 
         {/* Title and Subtitle */}
-        <h2 className="text-2xl font-bold mb-4 mt-4">{title}</h2>
+        <h2 className="text-2xl font-bold mb-3 mt-4">{title}</h2>
         <p className="text-base-content/60">{subtitle}</p>
+        <p>Special thanks to ChatGPT and Claude AI for their invaluable assistance in bringing BUZZ to life!</p>
       </div>
     </div>
   );

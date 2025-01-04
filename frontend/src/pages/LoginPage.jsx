@@ -121,7 +121,7 @@ const LoginPage = () => {
       {/* Right Side - Image/Pattern */}
       <AuthImagePattern
         title={"Welcome back!"}
-        subtitle={"Sign in to continue your conversations and catch up with your messages."}
+        subtitle={"Your hive awaits—log in and start buzzing!"}
       />
     </div>
   );
