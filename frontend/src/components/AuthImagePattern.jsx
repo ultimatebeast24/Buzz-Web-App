@@ -37,7 +37,7 @@ const AuthImagePattern = ({ title, subtitle }) => {
         {/* Title and Subtitle */}
         <h2 className="text-2xl font-bold mb-3 mt-4">{title}</h2>
         <p className="text-base-content/60">{subtitle}</p>
-        <p>Special thanks to ChatGPT and Claude AI for their invaluable assistance in bringing BUZZ to life!</p>
+        <p>Special thanks to Claude AI for it's invaluable assistance in bringing BUZZ to life!</p>
       </div>
     </div>
   );
