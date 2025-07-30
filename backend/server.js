@@ -7,6 +7,7 @@ import path from "path";
 
 import authRoutes from "./routes/auth.routes.js";
 import messageRoutes from "./routes/message.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 import connectToMongoDB from './db/connectToMongoDB.js';
 import { app,server } from './utils/socket.js';
@@ -31,8 +32,9 @@ app.use(
     })
 );
 
-app.use("/api/auth", authRoutes); //middle layer    
+app.use("/api/auth", authRoutes); //middle layer
 app.use("/api/messages", messageRoutes); //middle layer
+app.use("/api/ai", aiRoutes); //middle layer
 
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "../frontend/dist")));
