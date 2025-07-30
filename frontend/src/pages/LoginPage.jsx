@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../components/AuthImagePattern";
 import { Link } from "react-router-dom";
-import { Eye, EyeClosed, EyeOff, Loader2, Lock, MessageSquare, UserPen } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, MessageSquare, UserPen } from "lucide-react";
 import toast from "react-hot-toast";
 
 const LoginPage = () => {
@@ -16,6 +16,15 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     login(formData);
+  };
+
+  const handleGuestLogin = () => {
+    // Predefined guest credentials
+    const guestCredentials = {
+      username: "guest",
+      password: "guest123"
+    };
+    login(guestCredentials);
   };
 
   return (
@@ -50,7 +59,7 @@ const LoginPage = () => {
                 <input
                     type="username"
                     className={`input input-bordered w-full pl-10`}
-                    placeholder="username"
+                    placeholder="sampleUser"
                     value={formData.username}
                     onChange={(e) => setFormData({ 
                         ...formData, 
@@ -77,7 +86,7 @@ const LoginPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   className={`input input-bordered w-full pl-10`}
-                  placeholder="••••••••"
+                  placeholder="123456"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
@@ -95,16 +104,26 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
-              {isLoggingIn ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </button>
+            <div className="flex gap-4">
+              <button type="submit" className="btn btn-primary flex-1" disabled={isLoggingIn}>
+                {isLoggingIn ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+              <button 
+                type="button"
+                onClick={handleGuestLogin}
+                className="btn btn-secondary"
+                disabled={isLoggingIn}
+              >
+                Explore as Guest
+              </button>
+            </div>
           </form>
 
           <div className="text-center">
@@ -121,9 +140,10 @@ const LoginPage = () => {
       {/* Right Side - Image/Pattern */}
       <AuthImagePattern
         title={"Welcome back!"}
-        subtitle={"Sign in to continue your conversations and catch up with your messages."}
+        subtitle={"Your hive awaits—log in and start buzzing!"}
       />
     </div>
   );
 };
+
 export default LoginPage;

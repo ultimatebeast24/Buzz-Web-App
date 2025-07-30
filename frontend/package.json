@@ -11,13 +11,14 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
+    "buzz": "file:..",
     "lucide-react": "^0.469.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^7.1.0",
     "socket.io-client": "^4.8.1",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

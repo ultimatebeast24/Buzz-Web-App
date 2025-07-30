@@ -1,13 +1,33 @@
 import { Image, Send, X } from 'lucide-react';
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import toast from "react-hot-toast";
 import { useChatStore } from '../store/useChatStore';
+import { getAutoSuggestions, detectToxicity } from '../lib/axios';
 
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
   const fileInputRef = useRef(null);
   const { sendMessage } = useChatStore();
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (text.length > 2) {
+        try {
+          const { suggestions } = await getAutoSuggestions(text);
+          setSuggestions(suggestions);
+        } catch (error) {
+          console.error("Failed to fetch auto suggestions:", error);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    };
+
+    const debounce = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(debounce);
+  }, [text]);
   
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -32,6 +52,12 @@ const MessageInput = () => {
     e.preventDefault(); //prevent refreshing the page
     if (!text.trim() && !imagePreview) return;
 
+    const { isToxic } = await detectToxicity(text.trim());
+    if (isToxic) {
+        toast.error("Your message has been blocked due to toxicity.");
+        return;
+    }
+
     try {
       await sendMessage({
         text: text.trim(),
@@ -41,6 +67,7 @@ const MessageInput = () => {
       // Clear form
       setText("");
       setImagePreview(null);
+      setSuggestions([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -49,7 +76,23 @@ const MessageInput = () => {
   
   
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full relative">
+      {suggestions.length > 0 && (
+        <div className="absolute bottom-full left-0 w-full bg-base-200 rounded-md shadow-lg mb-1">
+            <ul className="menu menu-sm">
+                {suggestions.map((suggestion, index) => (
+                    <li key={index}>
+                        <a onClick={() => {
+                            setText(suggestion);
+                            setSuggestions([]);
+                        }}>
+                            {suggestion}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </div>
+      )}
       {imagePreview && (
         <div className="mb-3 flex items-center gap-2">
           <div className="relative">
