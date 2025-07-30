@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useChatStore } from '../store/useChatStore';
 
 import ChatHeader from './ChatHeader';
@@ -6,11 +6,43 @@ import MessageInput  from './MessageInput';
 import MessageSkeleton from './skeletons/MessageSkeleton';
 import { useAuthStore } from '../store/useAuthStore';
 import { formatMessageTime } from "../lib/utils";
+import { getSmartReplies, analyzeSentiment } from '../lib/axios';
 
 const ChatContainer = () => {
-  const { messages, getMessages, isMessagesLoading, selectedUser, subscribeToMessages, unsubscribeFromMessages } = useChatStore();
+  const { messages, getMessages, isMessagesLoading, selectedUser, subscribeToMessages, unsubscribeFromMessages, setMessages } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
+  const [smartReplies, setSmartReplies] = useState([]);
+  const [sentiment, setSentiment] = useState(null);
+
+  useEffect(() => {
+    const fetchSmartReplies = async () => {
+      if (messages.length > 0) {
+        const lastMessages = messages.slice(-5).map(m => ({ senderId: m.senderId, message: m.text }));
+        try {
+          const { replies } = await getSmartReplies({ messages: lastMessages });
+          setSmartReplies(replies);
+        } catch (error) {
+          console.error("Failed to fetch smart replies:", error);
+        }
+      }
+    };
+
+    const analyzeConversationSentiment = async () => {
+      if (messages.length > 0) {
+        const conversationText = messages.map(m => m.text).join(' ');
+        try {
+          const { sentiment } = await analyzeSentiment(conversationText);
+          setSentiment(sentiment);
+        } catch (error) {
+          console.error("Failed to analyze sentiment:", error);
+        }
+      }
+    };
+
+    fetchSmartReplies();
+    analyzeConversationSentiment();
+  }, [messages]);
 
   useEffect(() => { 
     getMessages(selectedUser._id);
@@ -24,6 +56,18 @@ const ChatContainer = () => {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
+
+  const handleSendFromSmartReply = (reply) => {
+    // This is a simplified version. You would need to implement the sendMessage logic from MessageInput here.
+    // For now, let's just add it to the messages list to see the effect.
+    const newMessage = {
+      _id: Date.now().toString(),
+      senderId: authUser._id,
+      text: reply,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages([...messages, newMessage]);
+  };
 
   if (isMessagesLoading) {
     return (
@@ -77,6 +121,23 @@ const ChatContainer = () => {
         ))}
       </div>
       
+      <div className="p-2 flex justify-center gap-2 items-center">
+        {smartReplies.map((reply, index) => (
+          <button
+            key={index}
+            className="btn btn-sm btn-outline"
+            onClick={() => handleSendFromSmartReply(reply)}
+          >
+            {reply}
+          </button>
+        ))}
+        {sentiment && (
+          <div className="text-xs opacity-50">
+            Conversation Sentiment: {sentiment}
+          </div>
+        )}
+      </div>
+
       <MessageInput />
       
     </div>
